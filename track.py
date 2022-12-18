@@ -12,8 +12,8 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # İstediğiniz şarkının adını ve sanatçısını buraya girin
-track_name = "Without Me"
-artist_name = "Halsey"
+track_name = "You're on Your Own, Kid"
+artist_name = "Taylor Swift"
 
 # Spotify API'yi kullanarak şarkıyı arayın
 results = sp.search(q=f'track:"{track_name}" artist:"{artist_name}"', type="track")

@@ -49,36 +49,39 @@ while True:
         print("")
         # Query to get album id
         results = sp.search(q=f'album:"{album_name}" artist:"{artist_name}"', type="album")
-        print(results)
         albums = results["albums"]["items"]
-
-        # Check if album exists
+        
+        i=1
         for album in albums:
-            # Check if album name and artist name match
-            if album["name"] == album_name:
-                for artist in album["artists"]:
-                    if artist["name"] == artist_name:
-                        album_id = album["id"]
-                        results = sp.album_tracks(album_id=album_id)
-                        tracks = results["items"]
-                        # Track list printing
-                        total_track_number = 0
-                        for track in tracks:
-                            total_track_number = total_track_number + 1
-                            print(track["name"])
-                            artists = track["artists"]
-                            artist_names = []
-                            for artist in artists:
-                                if artist["name"] != artist_name:
-                                    artist_names.append(artist["name"])
-                            artist_names_str = ", ".join(artist_names)
-                            if len(artist_names) > 0:
-                                print("Other Artists: " + artist_names_str)
+            print(f"{i}.Album Name: {album['name']}\nFirst Artist Name: {album['artists'][0]['name']}\nSpotify URI: {album['uri']}\n------------------------")
+            i+=1
 
-                        print("\nTotal Tracks: ", total_track_number)
-                        print(total_duration_time(tracks))
-                        print("Spotify URI: " + album["uri"])
-                        print(release_date(album) + "\n***********************")
+        print(f"retrieved {i} albums related to given album name and artist name, also their spotify uri's to check them on spotify")
+        print("So which album do you want to see details of?")
+        album_number = int(input("Enter the number of album: "))
+        os.system('cls')
+        print(f"{i}.Album: " + albums[album_number - 1]["name"])
+        print("***********************")
+        
+        album_id = albums[album_number-1]["id"]
+        album_track_results = sp.album_tracks(album_id=album_id)
+        all_tracks = album_track_results["items"]
+        
+        for track in all_tracks:
+            print(track["name"])
+            artists = track["artists"]
+            artist_names = []
+            for artist in artists:
+                if artist["name"] != artist_name:
+                    artist_names.append(artist["name"])
+            artist_names_str = ", ".join(artist_names)
+            if len(artist_names) > 0:
+                print("Other Artists: " + artist_names_str)
+        
+        print("\nTotal Tracks: ", album["total_tracks"])
+        print(total_duration_time(all_tracks))
+        print("Spotify URI: " + album["uri"])
+        print(release_date(album) + "\n***********************")
 
     elif selection == "2":
         os.system('cls')
@@ -90,12 +93,21 @@ while True:
         tracks = results["tracks"]["items"]
 
         for track in tracks:
-            if track["name"] == track_name:
+            if track["name"] == track_name:    
+                artists = track["artists"]
+                print("All Artists: ", end="")
+                artist_names = []
+                for artist in artists:
+                    if artist["name"] != artist_name:
+                        artist_names.append(artist["name"])
+                
                 track_uri = track["uri"]
                 track_details = sp.track(track_uri)
                 track_album = track_details["album"]
-
-                print(total_duration_time([track]))
+                
+                for artist in track["artists"]:
+                    print(artist["name"], end=", ")
+                print("\n" + total_duration_time([track]))
                 print("Track Album: " + track_album["name"])
                 print("Track URI: " + track_uri)
                 print(release_date(track_album))
