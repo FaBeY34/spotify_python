@@ -56,17 +56,17 @@ while True:
             print(f"{i}.Album Name: {album['name']}\nFirst Artist Name: {album['artists'][0]['name']}\nSpotify URI: {album['uri']}\n------------------------")
             i+=1
 
-        print(f"retrieved {i} albums related to given album name and artist name, also their spotify uri's to check them on spotify")
+        print(f"retrieved {i - 1} albums related to given album name and artist name, also their spotify uri's to check them on spotify")
         print("So which album do you want to see details of?")
         album_number = int(input("Enter the number of album: "))
         os.system('cls')
-        print(f"{i}.Album: " + albums[album_number - 1]["name"])
+        print("Selected Album: " + albums[album_number - 1]["name"])
         print("***********************")
         
         album_id = albums[album_number-1]["id"]
         album_track_results = sp.album_tracks(album_id=album_id)
         all_tracks = album_track_results["items"]
-        
+
         for track in all_tracks:
             print(track["name"])
             artists = track["artists"]
@@ -78,7 +78,7 @@ while True:
             if len(artist_names) > 0:
                 print("Other Artists: " + artist_names_str)
         
-        print("\nTotal Tracks: ", album["total_tracks"])
+        print("\nTotal Tracks: ", album_track_results["total"])
         print(total_duration_time(all_tracks))
         print("Spotify URI: " + album["uri"])
         print(release_date(album) + "\n***********************")
