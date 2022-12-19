@@ -36,37 +36,33 @@ def lyrics(item):
         return "Lyrics: None\n"
     return "Lyrics:\n" + item["lyrics"]
 
-while True:
-    print("*********************** Spotify API Program ***********************")
-    print("1- Album Name, Track List and Album Details")
-    print("2- Track Name and Track Details")
-    selection = input("3- Exit\n")
+def get_results(item_name, artist_name, type):
+    results = sp.search(q=f'{type}:"{item_name}" artist:"{artist_name}"', type=type)
+    items = results[type + "s"]["items"]
+    if items == []:
+        print("No Results Found")
+        return
+    i=1
+    for item in items:
+        print(f"{i}.Album Name: {item['name']}\nFirst Artist Name: {item['artists'][0]['name']}\nSpotify URI: {item['uri']}\n------------------------")
+        i+=1
     
-    if selection == "1":
-        os.system('cls')
-        album_name = input("Enter Album Name (case sensitive): ")
-        artist_name = input("Enter Artist Name (case sensitive): ")
-        print("")
-        # Query to get album id
-        results = sp.search(q=f'album:"{album_name}" artist:"{artist_name}"', type="album")
-        albums = results["albums"]["items"]
-        
-        i=1
-        for album in albums:
-            print(f"{i}.Album Name: {album['name']}\nFirst Artist Name: {album['artists'][0]['name']}\nSpotify URI: {album['uri']}\n------------------------")
-            i+=1
+    print(f"retrieved {i - 1} {type}s related to given {type} name and artist name, also their spotify uri's to check them on spotify\n------------------------")
+    print(f"so which {type} do you want to see details of?")
 
-        print(f"retrieved {i - 1} albums related to given album name and artist name, also their spotify uri's to check them on spotify")
-        print("So which album do you want to see details of?")
-        album_number = int(input("Enter the number of album: "))
-        os.system('cls')
-        print("Selected Album: " + albums[album_number - 1]["name"])
-        print("***********************")
-        
-        album_id = albums[album_number-1]["id"]
-        album_track_results = sp.album_tracks(album_id=album_id)
-        all_tracks = album_track_results["items"]
+    item_number = int(input(f"Enter the number of {type}: "))
+    os.system('cls')
+    
+    print(f"selected {type}: " + items[item_number - 1]["name"])
+    print("***********************")
 
+    selected_item = items[item_number - 1] #selected item
+    item_id = items[item_number - 1]["id"] #for album
+    item_uri = items[item_number - 1]["uri"] #for track and album
+
+    if type == "album":
+        all_results = sp.album_tracks(item_id)
+        all_tracks = all_results["items"]
         for track in all_tracks:
             print(track["name"])
             artists = track["artists"]
@@ -77,44 +73,47 @@ while True:
             artist_names_str = ", ".join(artist_names)
             if len(artist_names) > 0:
                 print("Other Artists: " + artist_names_str)
-        
-        print("\nTotal Tracks: ", album_track_results["total"])
+        print("\nTotal Tracks: ", all_results["total"])
         print(total_duration_time(all_tracks))
-        print("Spotify URI: " + album["uri"])
-        print(release_date(album) + "\n***********************")
+        print(release_date(selected_item) + "\n***********************")
+
+    elif type == "track":
+        track_details = sp.track(item_uri)
+        track_album = track_details["album"]
+        print("Artists: ", end="")
+        for artist in selected_item["artists"]:
+            print(artist["name"], end=", ")
+        print("\n" + total_duration_time([selected_item]))
+        print("Album Name: " + track_album["name"])
+        print(release_date(track_album) + "\n***********************")
+
+    print("Spotify URI: " + item_uri)
+
+
+while True:
+    print("*********************** Spotify API Program ***********************")
+    print("Do not enter full album or track name for better selection\n------------------------")
+    print("1- Album Name, Track List and Album Details")
+    print("2- Track Name and Track Details")
+    selection = input("3- Exit\n")
+    
+    if selection == "1":
+        os.system('cls')
+        album_name = input("Enter Album Name (with few characters): ")
+        artist_name = input("Enter Artist Name (case sensitive): ")
+        print("")
+        get_results(album_name, artist_name, "album")
 
     elif selection == "2":
         os.system('cls')
-        track_name = input("Enter Track Name (case sensitive): ")
+        track_name = input("Enter Track Name (with few characters): ")
         artist_name = input("Enter Artist Name (case sensitive): ")
         print("")
-        #!!
-        results = sp.search(q=f'track:"{track_name}" artist:"{artist_name}"', type="track")
-        tracks = results["tracks"]["items"]
-
-        for track in tracks:
-            if track["name"] == track_name:    
-                artists = track["artists"]
-                print("All Artists: ", end="")
-                artist_names = []
-                for artist in artists:
-                    if artist["name"] != artist_name:
-                        artist_names.append(artist["name"])
-                
-                track_uri = track["uri"]
-                track_details = sp.track(track_uri)
-                track_album = track_details["album"]
-                
-                for artist in track["artists"]:
-                    print(artist["name"], end=", ")
-                print("\n" + total_duration_time([track]))
-                print("Track Album: " + track_album["name"])
-                print("Track URI: " + track_uri)
-                print(release_date(track_album))
-                print(lyrics([track])+ "\n***********************")#!!
-                break
+        get_results(track_name, artist_name, "track")
+        # print(lyrics([track])+ "\n***********************")#!!
 
     elif selection == "3":
         break
+
     input("Press Enter to enter again...")
     os.system('cls')
