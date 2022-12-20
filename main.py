@@ -49,44 +49,57 @@ def get_results(item_name, artist_name, type):
 
     item_number = int(input(f"Enter the number of {type}: "))
     os.system('cls')
-    
-    print(f"{items[item_number - 1]['name']}")
-    print(f"{items[item_number - 1]['artists'][0]['name']}")
-    print("***********************")
 
-    selected_item = items[item_number - 1] #selected item
-    item_id = items[item_number - 1]["id"] #for album
-    item_uri = items[item_number - 1]["uri"] #for track and album
+    with open("./sample.txt", "w") as file:
+        print(f"{items[item_number - 1]['name']}")
+        print(f"{items[item_number - 1]['artists'][0]['name']}")
+        file.write(f"{items[item_number - 1]['name']}\n")
+        file.write(f"{items[item_number - 1]['artists'][0]['name']}\n")
+        print("***********************")
 
-    if type == "album":
-        all_results = sp.album_tracks(item_id)
-        all_tracks = all_results["items"]
-        for track in all_tracks:
-            print(track["name"])
-            artists = track["artists"]
-            artist_names = []
-            for artist in artists:
-                if artist["name"] != artist_name:
-                    artist_names.append(artist["name"])
-            artist_names_str = ", ".join(artist_names)
-            if len(artist_names) > 0:
-                print("Other Artists: " + artist_names_str)
-        print("\nTotal Tracks: ", all_results["total"])
-        print(total_duration_time(all_tracks))
-        print(release_date(selected_item) + "\n***********************")
+        selected_item = items[item_number - 1] #selected item
+        item_id = items[item_number - 1]["id"] #for album
+        item_uri = items[item_number - 1]["uri"] #for track and album
 
-    elif type == "track":
-        track_details = sp.track(item_uri)
-        track_album = track_details["album"]
-        print("Artists: ", end="")
-        for artist in selected_item["artists"]:
-            print(artist["name"], end=", ")
-        print("\n" + total_duration_time([selected_item]))
-        print("Album Name: " + track_album["name"])
-        print(release_date(track_album) + "\n***********************")
+        if type == "album":
+            all_results = sp.album_tracks(item_id)
+            all_tracks = all_results["items"]
+            for track in all_tracks:
+                print(track["name"])
+                file.write(f"{track['name']}\n")
 
-    print("Spotify URI: " + item_uri)
+                artists = track["artists"]
+                artist_names = []
+                for artist in artists:
+                    if artist["name"] != artist_name:
+                        artist_names.append(artist["name"])
+                artist_names_str = ", ".join(artist_names)
+                if len(artist_names) > 0:
+                    print("Other Artists: " + artist_names_str)
+            print(total_duration_time(all_tracks))
+            print("Album Photo URL: " + selected_item["images"][0]["url"])
+            print(release_date(selected_item) + "\n***********************")
+            file.write(f"{total_duration_time(all_tracks)}\n")
+            file.write(f"{selected_item['images'][0]['url']}\n")
+            file.write(f"{release_date(selected_item)}\n")
 
+        elif type == "track":
+            track_details = sp.track(item_uri)
+            track_album = track_details["album"]
+            print("Artists: ", end="")
+            file.write("Artists: ")
+            for artist in selected_item["artists"]:
+                print(artist["name"], end=", ")
+                file.write(f"{artist['name']}, ")
+            print("\n" + total_duration_time([selected_item]))
+            print("Album Name: " + track_album["name"])
+            print(release_date(track_album) + "\n***********************")
+            file.write(f"\n{total_duration_time([selected_item])}\n")
+            file.write(f"{track_album['name']}\n")
+            file.write(f"{release_date(track_album)}\n")
+
+        print("Spotify URI: " + item_uri)
+        file.write(f"{item_uri}\n")
 
 while True:
     print("*********************** Spotify API Program ***********************")
