@@ -16,12 +16,9 @@ def total_duration_time(tracks):
     total_duration_ms = 0
     for track in tracks:
         total_duration_ms += track["duration_ms"]
-    total_duration_minutes = int((total_duration_ms / 1000 / 60) % 60)
-    total_duration_hours = int((total_duration_ms / 1000 / 60) / 60)
+    total_duration_minutes = int((total_duration_ms / 1000) / 60)
     total_duration_seconds = int((total_duration_ms / 1000) % 60)   
-    if total_duration_hours == 0:
-        return "Run Time: " + str(total_duration_minutes) + " min " + str(total_duration_seconds) + " sec"
-    return "Run Time: " + str(total_duration_hours) + " hr " + str(total_duration_minutes) + " min"
+    return "Run Time: " + str(total_duration_minutes) + ":" + str(total_duration_seconds)
 
 def release_date(item):
     release_date = str(item["release_date"])
@@ -53,7 +50,8 @@ def get_results(item_name, artist_name, type):
     item_number = int(input(f"Enter the number of {type}: "))
     os.system('cls')
     
-    print(f"selected {type}: " + items[item_number - 1]["name"])
+    print(f"{items[item_number - 1]['name']}")
+    print(f"{items[item_number - 1]['artists'][0]['name']}")
     print("***********************")
 
     selected_item = items[item_number - 1] #selected item
